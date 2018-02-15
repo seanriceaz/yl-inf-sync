@@ -1,0 +1,27 @@
+{
+  "name": "yl-inf-sync",
+  "version": "1.0.0",
+  "description": "Enables one-way sync from Young Living account to Infusionsoft",
+  "main": "index.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://seanricenet@bitbucket.org/seanricenet/yl-inf-sync.git"
+  },
+  "keywords": [
+    "Young",
+    "Living",
+    "Infusionsoft",
+    "Contact",
+    "Sync"
+  ],
+  "author": "Sean Rice",
+  "license": "ISC",
+  "homepage": "https://bitbucket.org/seanricenet/yl-inf-sync#readme",
+  "dependencies": {
+    "infusionsoft-sdk": "0.0.2",
+    "youngliving-node": "github:seanriceaz/youngliving-node"
+  }
+}
