@@ -1,0 +1,11 @@
+{
+  "yl":{
+    "username":"",
+    "password":""
+  },
+  "infusionsoft":{
+    "app-name":"",
+    "api-key":"",
+    "secret":""
+  }
+}
