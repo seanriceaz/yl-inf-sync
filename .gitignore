@@ -1,5 +1,6 @@
-# Config file
+# Config files
 config.json
+*.env
 
 # Logs
 logs

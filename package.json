@@ -21,7 +21,11 @@
   "license": "ISC",
   "homepage": "https://bitbucket.org/seanricenet/yl-inf-sync#readme",
   "dependencies": {
+    "dotenv": "^5.0.0",
     "infusionsoft-sdk": "0.0.2",
     "youngliving-node": "github:seanriceaz/youngliving-node"
+  },
+  "devDependencies": {
+    "json2csv": "^3.11.5"
   }
 }
