@@ -20,11 +20,14 @@ yl.use(login_options);
 
 var period = yl.get_period(); // or pass optional date parameter for a different period.
 var per_page = 200, page_number = 1;
+var accounts = [];
 var handle_all_members = function (err, data) {
+  accounts = accounts.concat(data.accounts);
   if (data.pagination.next) {
     data.pagination.next(handle_all_members);
   }
-  fs.writeFile('output.log',JSON.stringify(data));
+  fs.writeFile('data/yl-new.json',JSON.stringify(accounts));
+  return accounts;
 }
 
 yl.all_members(period, per_page, page_number, handle_all_members);

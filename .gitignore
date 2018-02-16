@@ -1,5 +1,7 @@
+# Stored data
+data
+
 # Config files
-config.json
 *.env
 
 # Logs
