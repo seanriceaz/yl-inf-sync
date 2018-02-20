@@ -1,7 +1,7 @@
 //Service stuff goes here!
 var dotenv = require('dotenv');
 const fs = require('fs');
-var isequal = require('is-equal-shallow');
+var fastEquals = require('fast-equals');
 dotenv.config();
 
 var json2csv = require('json2csv');
@@ -24,9 +24,10 @@ var per_page = 200, page_number = 1;
 
 var build_array_keys = function (obj){
   //Loops through an array of members and creates keys from each element.
+  console.log("Building array keys...")
   var newObj = [];
   for (el in obj){
-    newObj[el.customerid]=el;
+    newObj[obj[el].customerid]=obj[el];
   }
   return (newObj);
 }
@@ -35,7 +36,7 @@ var accounts = [];
 var updatedAccounts = [];
 var handle_all_members = function (err, data) {
   //This function gets all the YL members returned from the call and flattens them to one javascript object.
-  if( !err ){
+  if( data ){
     accounts = accounts.concat(data.accounts);
     if (data.pagination.next) {
       //If we're not at the end of the list yet, recurse
@@ -51,17 +52,33 @@ var handle_all_members = function (err, data) {
 }
 
 var compare_to_past = function ( freshData ) {
-  //This function looks at the new data and compares it to the past data. Ultimately, it creates am array or member ID's that have changed.
+  //This function looks at the new data and compares it to the past data. Ultimately, it creates an array of member ID's that have changed.
   //load data to a js object
-  oldData = build_array_keys(JSON.parse(fs.readFileSync('data/yl-old', 'utf8')));
-  //loop through fresh and see if there's anything new
-  for (member in freshData){
-    if (isequal(member,oldData[member.customerid])){
-      //do nothing
-    } else {
-      updatedAccounts.push(member.customerid);
+  if (fs.existsSync('data/yl-old.json')){
+    try{
+      oldData = build_array_keys(JSON.parse(fs.readFileSync('data/yl-old.json', 'utf8')));
+    } catch (e){
+      console.log(e);
     }
+    //loop through fresh and see if there's anything new
+    for (member in freshData){
+      if (fastEquals.deepEqual(freshData[member],oldData[freshData[member].customerid])){
+        //do nothing
+      } else {
+
+        updatedAccounts.push(freshData[member].customerid);
+        console.log("Member info changed: " + freshData[member].name + " - " + freshData[member].customerid);
+      }
+    }
+  } else {
+    //Everything is new.
+
+
+
   }
+  //Write everything to our file.
+  //write_data(freshData);
+
 }
 
 var write_data = function ( freshData ){
