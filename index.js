@@ -1,10 +1,14 @@
 //Service stuff goes here!
-var dotenv = require('dotenv');
+const dotenv = require('dotenv');
 const fs = require('fs');
-var fastEquals = require('fast-equals');
+const fastEquals = require('fast-equals');
 dotenv.config();
 
-var json2csv = require('json2csv');
+const InfusionsoftRestApi = require('infusionsoft_rest_api');
+
+let apiInstance = new InfusionsoftRestApi.ContactApi();
+
+const json2csv = require('json2csv');
 
 var fields = ['field1', 'field2', 'field3'];
 
@@ -46,6 +50,27 @@ var handle_all_members = function (err, data) {
             //We've reached the end of the list!
             //Let's kick this out to a separate function.
             compare_to_past(build_array_keys(accounts));
+
+            // This is where to push updates to infusionsoft...
+            // info here: https://github.com/infusionsoft/infusionsoft-sdk-nodejs/blob/master/docs/ContactApi.md#updateContactUsingPATCH
+            // and here: https://github.com/infusionsoft/infusionsoft-sdk-nodejs/blob/master/docs/ContactApi.md#updateContactUsingPATCH
+            /* var opts = {
+              'since': "since_example", // {String} Date to start searching from ex. `2017-01-01T22:17:59.039Z`
+              'until': "until_example", // {String} Date to search to ex. `2017-01-01T22:17:59.039Z`
+              'limit': 56, // {Number} Sets a total of items to return
+              'offset': 56 // {Number} Sets a beginning range of items to return
+            };
+
+            var callback = function(error, data, response) {
+              if (error) {
+                console.error(error);
+              } else {
+                console.log('API called successfully. Returned data: ' + data);
+              }
+            };
+            api.appointmentsUsingGET(opts, callback);
+            */
+
         }
     } else {
         console.log(err);

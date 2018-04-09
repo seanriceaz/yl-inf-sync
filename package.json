@@ -23,7 +23,7 @@
   "dependencies": {
     "dotenv": "^5.0.0",
     "fast-equals": "^1.0.6",
-    "infusionsoft-sdk": "0.0.2",
+    "infusionsoft-sdk": "https://github.com/infusionsoft/infusionsoft-sdk-nodejs",
     "youngliving-node": "github:seanriceaz/youngliving-node"
   },
   "devDependencies": {
