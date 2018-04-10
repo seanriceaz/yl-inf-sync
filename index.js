@@ -143,23 +143,25 @@ var pushToInfusionsoft(member){
     'limit': 1, // Number | Sets a total of items to return
     'offset': 1, // Number | Sets a beginning range of items to return
     'customFields': {
-      'member_id': member.customerid;
-    }
+      'member_id': member.customerid
+    },
+    'optional_properties': ['custom_fields']
+
+
   };
 
   apiInstance.listContactsUsingGET(opts, (error, data, response) => {
     if (error) {
       console.error(error);
     } else {
-      console.log('API called successfully. Returned data: ' + data);
+      console.log('Found the member!: ' + data);
       if (data.length < 1){
         //Just push new
-      } else if (data.length ==1){
-        var inf_member_email = data[0].emailAddresses[0];
+      } else {
+        var inf_member_id = data[0].id;
         //push an update
 
-      } else {
-        console.log('Dupe!');
+
       }
     }
 
