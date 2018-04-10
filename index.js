@@ -50,27 +50,6 @@ var handle_all_members = function (err, data) {
             //We've reached the end of the list!
             //Let's kick this out to a separate function.
             compare_to_past(build_array_keys(accounts));
-
-            // This is where to push updates to infusionsoft...
-            // info here: https://github.com/infusionsoft/infusionsoft-sdk-nodejs/blob/master/docs/ContactApi.md#updateContactUsingPATCH
-            // and here: https://github.com/infusionsoft/infusionsoft-sdk-nodejs/blob/master/docs/ContactApi.md#updateContactUsingPATCH
-            /* var opts = {
-              'since': "since_example", // {String} Date to start searching from ex. `2017-01-01T22:17:59.039Z`
-              'until': "until_example", // {String} Date to search to ex. `2017-01-01T22:17:59.039Z`
-              'limit': 56, // {Number} Sets a total of items to return
-              'offset': 56 // {Number} Sets a beginning range of items to return
-            };
-
-            var callback = function(error, data, response) {
-              if (error) {
-                console.error(error);
-              } else {
-                console.log('API called successfully. Returned data: ' + data);
-              }
-            };
-            api.appointmentsUsingGET(opts, callback);
-            */
-
         }
     } else {
         console.log(err);
@@ -93,6 +72,7 @@ var compare_to_past = function (freshData) {
             } else {
                 updatedAccounts.push(freshData[member].customerid);
                 console.log("Member info changed: " + freshData[member].name + " - " + freshData[member].customerid);
+                pushToInfusionsoft(freshData[member]);
             }
         }
         //Push updates to Infusionsoft (Don't forget to split the names!)
@@ -100,8 +80,9 @@ var compare_to_past = function (freshData) {
     } else {
         //Everything is new.
         //Push everything to Infusionsoft (Don't forget to split the names!)
-
-
+        for(member in freshData) {
+          pushToInfusionsoft(freshData[member]);
+        }
     }
     //Write everything to our file.
     //write_data(freshData);
@@ -155,6 +136,53 @@ var split_format_name = function (name) {
         first: firstName,
         last: lastName
     }
+}
+
+var pushToInfusionsoft(member){
+  let opts = {
+    'limit': 1, // Number | Sets a total of items to return
+    'offset': 1, // Number | Sets a beginning range of items to return
+    'customFields': {
+      'member_id': member.customerid;
+    }
+  };
+
+  apiInstance.listContactsUsingGET(opts, (error, data, response) => {
+    if (error) {
+      console.error(error);
+    } else {
+      console.log('API called successfully. Returned data: ' + data);
+      if (data.length < 1){
+        //Just push new
+      } else if (data.length ==1){
+        var inf_member_email = data[0].emailAddresses[0];
+        //push an update
+
+      } else {
+        console.log('Dupe!');
+      }
+    }
+
+  });
+  // This is where to push updates to infusionsoft...
+  // info here: https://github.com/infusionsoft/infusionsoft-sdk-nodejs/blob/master/docs/ContactApi.md#updateContactUsingPATCH
+  // and here: https://github.com/infusionsoft/infusionsoft-sdk-nodejs/blob/master/docs/ContactApi.md#updateContactUsingPATCH
+  /* var opts = {
+    'since': "since_example", // {String} Date to start searching from ex. `2017-01-01T22:17:59.039Z`
+    'until': "until_example", // {String} Date to search to ex. `2017-01-01T22:17:59.039Z`
+    'limit': 56, // {Number} Sets a total of items to return
+    'offset': 56 // {Number} Sets a beginning range of items to return
+  };
+
+  var callback = function(error, data, response) {
+    if (error) {
+      console.error(error);
+    } else {
+      console.log('API called successfully. Returned data: ' + data);
+    }
+  };
+  api.appointmentsUsingGET(opts, callback);
+  */
 }
 
 yl.all_members(period, per_page, page_number, handle_all_members);
