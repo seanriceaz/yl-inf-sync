@@ -1,7 +1,7 @@
 var express = require('express'),
     passport = require('passport'),
     router  = express.Router(),
-    contactService = require('../contactService');
+    contactService = require('../services/contactService');
 
 router.use(function(req, res, next){
     res.setHeader('Content-Type', 'application/json');

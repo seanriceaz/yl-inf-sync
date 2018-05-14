@@ -1,7 +1,12 @@
+const dotenv = require('dotenv');
 var passport 		= require('passport'),
     InfusionsoftStrategy  = require('passport-infusionsoft').Strategy;
 
-var env				= process.env.NODE_ENV || "development",
+var env				= process.env.NODE_ENV || "development";
+
+dotenv.config();
+
+console.log(process.env.IS_CLIENT);
 
 passport.use(new InfusionsoftStrategy({
         clientID: process.env.IS_CLIENT,

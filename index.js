@@ -1,6 +1,5 @@
 //Service stuff goes here!
 var		env				= process.env.NODE_ENV || "development",
-    config			= require('./config')[env],
     http			= require('http'),
     compression 	= require('compression'),
     cookieSession	= require('cookie-session'),
@@ -16,9 +15,10 @@ const fastEquals = require('fast-equals');
 
 dotenv.config();
 
-const InfusionsoftRestApi = require('infusionsoft_rest_api');
+/*const InfusionsoftRestApi = require('infusionsoft_rest_api');
 
 let apiInstance = new InfusionsoftRestApi.ContactApi();
+*/
 
 const json2csv = require('json2csv');
 
@@ -150,7 +150,7 @@ var split_format_name = function (name) {
     }
 }
 
-var pushToInfusionsoft(member){
+function pushToInfusionsoft(member){
   let opts = {
     'limit': 1, // Number | Sets a total of items to return
     'offset': 1, // Number | Sets a beginning range of items to return
@@ -161,7 +161,7 @@ var pushToInfusionsoft(member){
 
 
   };
-
+  /*
   apiInstance.listContactsUsingGET(opts, (error, data, response) => {
     if (error) {
       console.error(error);
@@ -178,6 +178,7 @@ var pushToInfusionsoft(member){
     }
 
   });
+  */
   // This is where to push updates to infusionsoft...
   // info here: https://github.com/infusionsoft/infusionsoft-sdk-nodejs/blob/master/docs/ContactApi.md#updateContactUsingPATCH
   // and here: https://github.com/infusionsoft/infusionsoft-sdk-nodejs/blob/master/docs/ContactApi.md#updateContactUsingPATCH
@@ -218,7 +219,7 @@ try {
 
 var app = express();
 app.use(compression());
-app.use(cookieSession({ keys: config.cookieSessionKeys }));
+app.use(cookieSession({ keys: [ process.env.COOKIE_SESSION_KEY ] }));
 app.use(bodyParser.urlencoded({ extended: true }));
 app.use(bodyParser.json());
 app.use(passport.initialize());

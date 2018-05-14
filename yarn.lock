@@ -853,9 +853,9 @@ inflight@^1.0.4:
     once "^1.3.0"
     wrappy "1"
 
-"infusionsoft-sdk@https://github.com/infusionsoft/infusionsoft-sdk-nodejs":
+infusionsoft-sdk@^0.0.2:
   version "0.0.2"
-  resolved "https://github.com/infusionsoft/infusionsoft-sdk-nodejs#298a8c765868c57f08231ce452789da5e7e5d41b"
+  resolved "https://registry.yarnpkg.com/infusionsoft-sdk/-/infusionsoft-sdk-0.0.2.tgz#f75ad4ce10bd54bc5fc6206fdaa288e394ca3293"
   dependencies:
     babel "^6.23.0"
     babel-cli "^6.24.1"

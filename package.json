@@ -27,7 +27,7 @@
     "dotenv": "^5.0.0",
     "express": "^4.16.3",
     "fast-equals": "^1.0.6",
-    "infusionsoft-sdk": "https://github.com/infusionsoft/infusionsoft-sdk-nodejs",
+    "infusionsoft-sdk": "^0.0.2",
     "passport": "^0.4.0",
     "passport-infusionsoft": "^0.0.3",
     "youngliving-node": "github:seanriceaz/youngliving-node"
