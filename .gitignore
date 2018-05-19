@@ -69,3 +69,6 @@ typings/
 # IDE
 .idea/
 .idea
+
+#Files that need to be hidden
+REFRESH
