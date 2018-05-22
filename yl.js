@@ -1,6 +1,7 @@
 const dotenv = require('dotenv');
 const fs = require('fs');
 const fastEquals = require('fast-equals');
+const parseFullName = require('parse-full-name').parseFullName;
 const json2csv = require('json2csv');
 
 dotenv.config();
@@ -16,6 +17,8 @@ var yl_login_options = {
 // Store credentials
 yl.use(yl_login_options);
 
+//Set up limits
+
 var period = yl.get_period(); // or pass optional date parameter for a different period.
 var per_page = 200,
     page_number = 1;
@@ -30,8 +33,27 @@ var build_array_keys = function (obj) {
     return (newObj);
 }
 
-var accounts = [];
-var updatedAccounts = [];
+var format_names = function(obj) {
+    console.log("Formatting names...");
+    for (var customerid in obj) {
+        if (obj.hasOwnProperty(customerid)) {
+            obj[customerid].properName = parseFullName(obj[customerid].name);
+        }
+    }
+    return obj;
+}
+
+async function get_all_members(){
+    var accounts = [];
+    let data = await yl.all_members(period, per_page, page_number);
+    while (data) {
+        accounts = accounts.concat(data.accounts);
+        data = await data.pagination.next();
+    }
+    return format_names(build_array_keys(accounts));
+}
+
+/*
 var handle_all_members = function (err, data) {
     //This function gets all the YL members returned from the call and flattens them to one javascript object.
     if (data) {
@@ -40,14 +62,16 @@ var handle_all_members = function (err, data) {
             //If we're not at the end of the list yet, recurse
             data.pagination.next(handle_all_members);
         } else {
-            //We've reached the end of the list!
-            //Let's kick this out to a separate function.
-            compare_to_past(build_array_keys(accounts));
+            //We've reached the end of the list.
+            // Let's format and normalize our array
+            accounts = format_names(build_array_keys(accounts));
+            return accounts;
         }
     } else {
-        console.log(err);
+        console.log(err)
+        return null;
     }
-}
+}*/
 
 var compare_to_past = function (freshData) {
     //This function looks at the new data and compares it to the past data. Ultimately, it creates an array of member ID's that have changed.
@@ -59,80 +83,31 @@ var compare_to_past = function (freshData) {
             console.log(e);
         }
         //loop through fresh and see if there's anything new
+        var updatedAccounts = [];
         for (member in freshData) {
             if (fastEquals.deepEqual(freshData[member], oldData[freshData[member].customerid])) {
                 //do nothing
             } else {
                 updatedAccounts.push(freshData[member].customerid);
                 console.log("Member info changed: " + freshData[member].name + " - " + freshData[member].customerid);
-                pushToInfusionsoft(freshData[member]);
             }
         }
-        //Push updates to Infusionsoft (Don't forget to split the names!)
-
+        return updatedAccounts;
     } else {
-        //Everything is new.
-        //Push everything to Infusionsoft (Don't forget to split the names!)
-        for(member in freshData) {
-            pushToInfusionsoft(freshData[member]);
-        }
+        return freshData;
     }
-    //Write everything to our file.
-    //write_data(freshData);
-
 }
 
-var write_data = function (freshData) {
+async function write_data (freshData) {
     //This is the last thing we should do
     fs.writeFile('data/yl-old.json', JSON.stringify(freshData));
 }
 
-var split_format_name = function (name) {
-    var firstName = "",
-        lastName = "",
-        nameArray = name.split(' ');
-    //Fix capitalization
-    for (i in nameArray) {
-        nameArray[i] = nameArray[i].charAt(0).toUpperCase() + nameArray[i].substr(1).toLowerCase();
-    }
-    if (name.indexOf(',') > 0) {
-        //We've got a reverse name. Easy peasy!
-        var stopAdding = false;
-        for (i = 0; i < nameArray.length; i++) {
-            if (!stopAdding) {
-                lastName = lastName + nameArray[i];
-            }
-            if (nameArray[i].indexOf(',') > 0) {
-                stopAdding = true;
-                lastName.replace(',', "");
-                firstName = nameArray[i + 1];
-            } else {
-                lastName = lastName + " ";
-            }
-        }
-    } else if (nameArray.length > 2) {
-        //determine if we need to figure out a two-word last name
-        var secondToLast = nameArray[nameArray.length - 2];
-        if (secondToLast == "Van" || secondToLast == "Von" || secondToLast == "Del") {
-            lastName = nameArray[nameArray.length - 2] + " " + nameArray[nameArray.length - 1];
-        } else if (secondToLast == "Der" && nameArray[nameArray.length - 3] == "Van") {
-            lastName = nameArray[nameArray.length - 3] + " " + nameArray[nameArray.length - 2] + " " + nameArray[nameArray.length - 1];
-        } else {
-            lastName = nameArray[nameArray.length - 1];
-        }
-        firstName = nameArray[0];
-    } else {
-        lastName = nameArray[nameArray.length - 1];
-        irstName = nameArray[0];
-    }
-    return {
-        first: firstName,
-        last: lastName
-    }
-}
-
-
-yl.all_members(period, per_page, page_number, handle_all_members);
+module.exports = {
+    all_members: get_all_members,
+    compare_to_past : compare_to_past,
+    write_data: write_data
+};
 
 //fs.writeFile('output.log',)
 
