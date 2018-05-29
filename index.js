@@ -72,54 +72,151 @@ for (accountid in accountsToUpdate) {
         //"contact_type": "string",
         "custom_fields": [
             {
-                "content": {},
-                "id": 0
+                "content": thisAccount.customerid,
+                "id": customFieldIDs.memberid
+            },
+            {
+                "content": thisAccount.level,
+                "id": customFieldIDs.level
+            },
+            {
+                "content": thisAccount.pv,
+                "id": customFieldIDs.pv
+            },
+            {
+                "content": thisAccount.ogv,
+                "id": customFieldIDs.ogv
+            },
+            {
+                "content": thisAccount.pgv,
+                "id": customFieldIDs.pgv
+            },
+            {
+                "content": thisAccount.autoship.day,
+                "id": customFieldIDs.autoshipday
+            },
+            {
+                "content": thisAccount.autoship.active,
+                "id": customFieldIDs.hasautoship
+            },
+            {
+                "content": thisAccount.autoship.pv,
+                "id": customFieldIDs.autoshippv
+            },
+            {
+                "content": thisAccount.autoship.status,
+                "id": customFieldIDs.autoshipstatus
+            },
+            {
+                "content": thisAccount.haspvassist,
+                "id": customFieldIDs.pvassistant
+            },
+            {
+                "content": dateFormat(thisAccount.signupdate, "isoDateTime"),
+                "id": customFieldIDs.signupdate
+            },
+            {
+                "content": thisAccount.sponsorid,
+                "id": customFieldIDs.sponsorid
+            },
+            {
+                "content": thisAccount.enrollerid,
+                "id": customFieldIDs.enrollerid
+            },
+            {
+                "content": dateFormat(thisAccount.lastorderdate, "isoDateTime"),
+                "id": customFieldIDs.lastorderdate
+            },
+            {
+                "content": thisAccount.lastorderpv,
+                "id": customFieldIDs.lastorderpv
+            },
+            {
+                "content": thisAccount.maxrankid,
+                "id": customFieldIDs.highestpaidrank
+            },
+            {
+                "content": thisAccount.previousrankid,
+                "id": customFieldIDs.previousrank
+            },
+            {
+                "content": thisAccount.rankid,
+                "id": customFieldIDs.currentrank
+            },
+            /*{
+                "content": thisAccount.isnewmaxrank,
+                "id": customFieldIDs.newmaxrank
+            },*/
+            {
+                "content": thisAccount.rankchange,
+                "id": customFieldIDs.rankchange
+            },
+            {
+                "content": thisAccount.futureautoshippv + thisAccount.totalpv,
+                "id": customFieldIDs.forecastpv
+            },
+            {
+                "content": thisAccount.futureautoshippv,
+                "id": customFieldIDs.schedulepv
+            },
+            {
+                "content": thisAccount.status,
+                "id": customFieldIDs.accountstatus
+            },
+            {
+                "content": thisAccount.customertype,
+                "id": customFieldIDs.accounttype
+            },
+            {
+                "content": dateFormat(thisAccount.dateactivated,"isoDateTime"),
+                "id": customFieldIDs.activateddate
             }
+
         ],
         "duplicate_option": "Email",
         "email_addresses": [
             {
-                "email": "string",
+                "email": thisAccount.email,
                 "field": "EMAIL1"
             }
         ],
-        "family_name": "string",
-        "fax_numbers": [
+        "family_name": thisAccount.properName.last,
+        /*"fax_numbers": [
             {
                 "field": "FAX1",
                 "number": "string",
                 "type": "string"
             }
-        ],
-        "given_name": "string",
-        "job_title": "string",
-        "lead_source_id": 0,
-        "middle_name": "string",
-        "notes": "string",
-        "opt_in_reason": "string",
-        "owner_id": 0,
+        ],*/
+        "given_name": thisAccount.properName.first,
+        //"job_title": "string",
+        //"lead_source_id": 0,
+        "middle_name": thisAccount.properName.middle,
+        //"notes": "string",
+        //"opt_in_reason": "string",
+        //"owner_id": 0,
         "phone_numbers": [
             {
-                "extension": "string",
+                //"extension": "string",
                 "field": "PHONE1",
-                "number": "string",
+                "number": thisAccount.mainphone,
                 "type": "string"
             }
         ],
         "preferred_locale": "en_US",
-        "preferred_name": "string",
-        "prefix": "string",
-        "social_accounts": [
+        //"preferred_name": thisAccount.properName.first,
+        "prefix": thisAccount.properName.prefix,
+        /*"social_accounts": [
             {
                 "name": "string",
                 "type": "Facebook"
             }
-        ],
-        "source_type": "WEBFORM",
-        "spouse_name": "string",
-        "suffix": "string",
-        "time_zone": "string",
-        "website": "string"
+        ],*/
+        //"source_type": "WEBFORM",
+        //"spouse_name": "string",
+        "suffix": thisAccount.properName.suffix
+        //"time_zone": "string",
+        //"website": "string"
     }
     //wait until it's done and upload another!
     try {
