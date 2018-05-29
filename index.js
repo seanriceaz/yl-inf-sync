@@ -2,6 +2,7 @@ const fs = require('fs');
 const infusionsoft =  require('infusionsoft');
 const yl = require ('yl');
 var request = require('request');
+var dateFormat = require('dateformat');
 
 //Here's how this app will flow...
 
@@ -19,7 +20,7 @@ var customFieldIDs = {
     "ogv" : 15, //decimal
     "pgv" : 17, //decimal
     "autoshipday" : 19, //int
-    "hasautoship" : 21, //bool (yes/no)
+    "hasautoship" : 21, //bool (yes/no) 0 or 1
     "autoshippv" : 23, //decimal
     "autoshipstatus" : 25, //text
     "pvassistant" : 27, //bool (yes/no) 0 or 1
@@ -37,7 +38,7 @@ var customFieldIDs = {
     "accountstatus" : 49, //text
     "accounttype" : 51, //text
     "activateddate" : 53, //date -- yyyy-mm-dd
-}
+};
 
 // store refresh token for next time
 fs.writeFileSync("./REFRESH", tokens.refresh);
@@ -48,30 +49,27 @@ let accountsToUpdate = yl.compare_to_past(accountsToUpdate);
 
 // Push those updates to Infusionsoft.
 for (accountid in accountsToUpdate) {
-
-
-
-
+    var thisAccount = accountsToUpdate[accountid];
     var contact = {
         "addresses": [
             {
-                "country_code": "string",
+                "country_code": thisAccount.maincountry,
                 "field": "BILLING",
-                "line1": "string",
-                "line2": "string",
-                "locality": "string",
-                "postal_code": "string",
-                "region": "string",
-                "zip_code": "string",
-                "zip_four": "string"
+                "line1": thisAccount.mainaddress1,
+                "line2": thisAccount.mainaddress2,
+                "locality": thisAccount.maincity,
+                //"postal_code": "string",
+                "region": thisAccount.mainstate,
+                "zip_code": thisAccount.mainzip.split("-")[0],
+                "zip_four": thisAccount.mainzip.split("-")[1]
             }
         ],
-        "anniversary": "2018-05-22T07:26:46.999Z",
-        "birthday": "2018-05-22T07:26:46.999Z",
-        "company": {
+        "anniversary": dateFormat(thisAccount.dateactivated, "isoDateTime"),
+        //"birthday": "2018-05-22T07:26:46.999Z",
+        /*"company": {
             "id": 0
-        },
-        "contact_type": "string",
+        },*/
+        //"contact_type": "string",
         "custom_fields": [
             {
                 "content": {},
