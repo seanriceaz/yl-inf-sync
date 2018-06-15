@@ -1,7 +1,3 @@
-var fields = ['field1', 'field2', 'field3'];
-
-
-
 var is_login_options = {
     is_client: process.env.IS_CLIENT,
     is_secret: process.env.IS_SECRET,

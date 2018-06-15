@@ -25,6 +25,7 @@
     "dotenv": "^5.0.0",
     "fast-equals": "^1.0.6",
     "parse-full-name": "^1.2.3",
+    "request": "^2.87.0",
     "youngliving-node": "github:seanriceaz/youngliving-node"
   },
   "devDependencies": {
