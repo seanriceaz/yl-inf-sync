@@ -96,16 +96,18 @@ var compare_to_past = function (freshData) {
     try {
         oldData = JSON.parse(fs.readFileSync('data/yl-old.json', 'utf8'));
         //loop through fresh and see if there's anything new
-        var updatedAccounts = [];
-        for (member in freshData) {
+        var updatedAccounts = {};
+        var count = 0;
+        for (var member in freshData) {
             if (fastEquals.deepEqual(freshData[member], oldData[freshData[member].customerid])) {
                 //do nothing
             } else {
-                updatedAccounts.push(freshData[member].customerid);
+                count++;
+                updatedAccounts[member] = freshData[member];
                 console.log("Member info changed: " + freshData[member].properName.first + " " +freshData[member].properName.last +" - " + freshData[member].customerid);
             }
         }
-        console.log(updatedAccounts.length + " Members updated");
+        console.log(count + " Members updated");
         return updatedAccounts;
     } catch (e) {
         console.log(e);
