@@ -25,10 +25,11 @@ var per_page = 200,
 
 var build_array_keys = function (obj) {
     //Loops through an array of members and creates keys from each element.
-    console.log("Building array keys...")
-    var newObj = [];
-    for (el in obj) {
-        newObj[obj[el].customerid] = obj[el];
+    console.log("Building a keyed object for " + obj.length + " members...");
+    var newObj = {};
+    for (var el in obj) {
+        var key = obj[el].customerid;
+        newObj[key] = obj[el];
     }
     return (newObj);
 }
@@ -45,12 +46,27 @@ var format_names = function(obj) {
 
 async function get_all_members(){
     var accounts = [];
-    let data = await yl.all_members(period, per_page, page_number);
-    while (data) {
+    console.log('getting members from YL...');
+    let data = await get_member_page(page_number);
+    while (data.pagination.currentpage <= data.pagination.totalpages) {
         accounts = accounts.concat(data.accounts);
-        data = await data.pagination.next();
+        console.log("page: "+page_number+ " | total accounts fetched: "+accounts.length+" | OK");
+        page_number ++;
+        data = await get_member_page(page_number);
     }
     return format_names(build_array_keys(accounts));
+}
+
+function get_member_page(page){
+    return new Promise(function(resolve, reject){
+        yl.all_members(period, per_page, page, function(err, data){
+            if(err){
+                reject(err);
+            } else {
+                resolve(data);
+            }
+        })
+    });
 }
 
 /*
@@ -76,12 +92,9 @@ var handle_all_members = function (err, data) {
 var compare_to_past = function (freshData) {
     //This function looks at the new data and compares it to the past data. Ultimately, it creates an array of member ID's that have changed.
     //load data to a js object
-    if (fs.existsSync('data/yl-old.json')) {
-        try {
-            oldData = build_array_keys(JSON.parse(fs.readFileSync('data/yl-old.json', 'utf8')));
-        } catch (e) {
-            console.log(e);
-        }
+
+    try {
+        oldData = JSON.parse(fs.readFileSync('data/yl-old.json', 'utf8'));
         //loop through fresh and see if there's anything new
         var updatedAccounts = [];
         for (member in freshData) {
@@ -89,18 +102,22 @@ var compare_to_past = function (freshData) {
                 //do nothing
             } else {
                 updatedAccounts.push(freshData[member].customerid);
-                console.log("Member info changed: " + freshData[member].name + " - " + freshData[member].customerid);
+                console.log("Member info changed: " + freshData[member].properName.first + " " +freshData[member].properName.last +" - " + freshData[member].customerid);
             }
         }
+        console.log(updatedAccounts.length + " Members updated");
         return updatedAccounts;
-    } else {
+    } catch (e) {
+        console.log(e);
         return freshData;
     }
 }
 
-async function write_data (freshData) {
+function write_data (freshData) {
     //This is the last thing we should do
-    fs.writeFile('data/yl-old.json', JSON.stringify(freshData));
+    console.log("writing updated accounts to disk...");
+    //console.log(JSON.stringify(freshData));
+    fs.writeFileSync('data/yl-old.json', JSON.stringify(freshData));
 }
 
 module.exports = {
