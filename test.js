@@ -1,8 +1,11 @@
 const fs = require('fs');
 const is =  require('./infusionsoft.js');
 const yl = require ('./yl.js');
+var request = require('request');
 var dateFormat = require('dateformat');
 var countries = require("i18n-iso-countries");
+
+//Here's how this app will flow...
 
 var customFieldIDs = {
     "memberid" : 11, //integer
@@ -36,40 +39,25 @@ var customFieldIDs = {
 yl.all_members()
     .then(function(result){
         var accountsToUpdate = yl.compare_to_past(result);
-        yl.write_data(result);
+        //yl.write_data(result);
+        //For our test, let's just push one FAKE contact through:
+        accountsToUpdate = {"1":{"customerid":1,"enrollerid":1,"sponsorid":1,"name":"FAKE MCFAKERSON","contactname":"","hasmultibytename":false,"hasmultibytecontactname":false,"level":0,"pv":0,"totalpv":0,"ogv":0,"pgv":0,"pgv2legs":0,"pgv3legs":0,"pgv4legs":0,"pgv5legs":0,"pgv6legs":0,"lastorderpv":0,"futureautoshippv":0,"mainaddress1":"555 W FAKE RD","mainaddress2":"","maincity":"Faketown","mainstate":"AZ","mainzip":"12345-1234","maincountry":"US","mainphone":"555-555-5555","haspvassist":false,"optedoutofemail":false,"rankid":-1,"maxrankid":-1,"previousrankid":0,"isnewmaxrank":false,"activitystatusid":1,"customertype":2,"signupdate":"Oct 22, 2010","lastorderdate":"","dateactivated":"Sep 12, 2017","autoship":{"active":false,"day":0,"pv":0,"shipped":false,"status":"none"},"maincountryid":1,"avatarimage":"","showcontactname":false,"email":"faketestertest@mailinator.com","rankchange":2,"onhold":false,"holdreason":"","properName":{"title":"","first":"Fake","middle":"","last":"McFakerson","nick":"","suffix":"","error":[]}}};
         return accountsToUpdate;
     }).then(function(accountsToUpdate){
         // Convert updated YL contacts into Infusionsoft Contact JSON format
         var jsonResult = {};
         for (accountid in accountsToUpdate) {
             var thisAccount = accountsToUpdate[accountid];
-            //normalize the country code
-            var billingcountry = "";
-            var billingregion = "";
-            if (thisAccount.maincountry.length==2) {
-                billingcountry = countries.alpha2ToAlpha3(thisAccount.maincountry);
-            } else if (thisAccount.maincountry.length==3){
-                billingcountry = thisAccount.maincountry;
-            } else if (thisAccount.maincountry.toLowerCase().indexOf("united states")>=0) {
-                billingcountry = "USA";
-            }
-
-            if (thisAccount.mainstate.length < 3 && billingcountry != ""){
-                billingregion = countries.alpha3ToAlpha2(billingcountry)+"-"+thisAccount.mainstate;
-            } else {
-                billingcountry = "";
-            }
-
             var contact = {
                 "addresses": [
                     {
-                        "country_code": billingcountry,
+                        "country_code": countries.alpha2ToAlpha3(thisAccount.maincountry),
                         "field": "BILLING",
                         "line1": thisAccount.mainaddress1,
                         "line2": thisAccount.mainaddress2,
                         "locality": thisAccount.maincity,
                         //"postal_code": "string",
-                        "region": billingregion,
+                        "region": thisAccount.maincountry + "-" + thisAccount.mainstate,
                         "zip_code": thisAccount.mainzip.split("-")[0],
                         "zip_four": thisAccount.mainzip.split("-")[1]
                     }
@@ -178,13 +166,14 @@ yl.all_members()
                         "id": customFieldIDs.accounttype
                     },
                     {
-                        "content": dateFormat(thisAccount.dateactivated,"isoDateTime"),
+                        "content": dateFormat(thisAccount.dateactivated, "isoDateTime"),
                         "id": customFieldIDs.activateddate
                     },
                     {
                         "content": thisAccount.optedoutofemail? 1 : 0,
                         "id": customFieldIDs.yloptedout
                     }
+
                 ],
                 "duplicate_option": "Email",
                 "email_addresses": [
@@ -249,6 +238,7 @@ yl.all_members()
             // Otherwise, try an update/create call (Simplest, but doesn't work currently when there's an email mismatch)
             is.create_update(contacts[contact]).then(function(ISContact){
                 ismappings[contact] = ISContact.id;
+                console.log("Successfully created/updated "+ISContact.id);
             }).catch(function(err){
                 console.log(err);
             });

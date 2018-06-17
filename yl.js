@@ -2,7 +2,6 @@ const dotenv = require('dotenv');
 const fs = require('fs');
 const fastEquals = require('fast-equals');
 const parseFullName = require('parse-full-name').parseFullName;
-const json2csv = require('json2csv');
 
 dotenv.config();
 
@@ -68,26 +67,6 @@ function get_member_page(page){
         })
     });
 }
-
-/*
-var handle_all_members = function (err, data) {
-    //This function gets all the YL members returned from the call and flattens them to one javascript object.
-    if (data) {
-        accounts = accounts.concat(data.accounts);
-        if (data.pagination.next) {
-            //If we're not at the end of the list yet, recurse
-            data.pagination.next(handle_all_members);
-        } else {
-            //We've reached the end of the list.
-            // Let's format and normalize our array
-            accounts = format_names(build_array_keys(accounts));
-            return accounts;
-        }
-    } else {
-        console.log(err)
-        return null;
-    }
-}*/
 
 var compare_to_past = function (freshData) {
     //This function looks at the new data and compares it to the past data. Ultimately, it creates an array of member ID's that have changed.

@@ -1,21 +1,72 @@
-var is_login_options = {
-    is_client: process.env.IS_CLIENT,
-    is_secret: process.env.IS_SECRET,
-    is_key: process.env.IS_KEY  //This won't work long term. need to build in the refresh mechanism...
+var request = require('request');
+throttledRequest = require('throttled-request')(request);
+const dotenv = require('dotenv');
+dotenv.config();
+
+throttledRequest.configure({
+    requests: 5,
+    milliseconds: 1000
+});
+
+var keys = {
+    client: process.env.IS_CLIENT,
+    secret: process.env.IS_SECRET,
+    key: process.env.IS_KEY // TODO: create an automated way to get the key using the refresh token!
 }
 
+function fetch_key(){
+    //if we don't have a key for this session, let's get a new one
+    return new Promise(function(resolve, reject){
+        if (keys.key){
+            resolve(keys.key);
+        } else {
+            //retrieve a key!
+            // store refresh token for next time
+            //fs.writeFileSync( "./REFRESH", tokens.refresh);
+            var err = Error("No Key, and we haven't written the way to get a new one");
+            if (err) {
+                reject(err);
+            } else {
+                resolve(data);
+            }
+        }
+    });
+}
 
-function pushToInfusionsoft(member){
+async function create_update(member, opts){
+    let key = await fetch_key();
+    return new Promise(function(resolve, reject){
+        throttledRequest({
+            method:'PUT',
+            url: 'https://api.infusionsoft.com/crm/rest/v1/contacts/',
+            json: true,
+            auth:{
+                'bearer': key
+            },
+            body: member
+        }, function(err, response, body){
+            var contact = body;
+            if (err) {
+                reject(err);
+            } else if (response.statusCode >= 400){
+                reject(Error('Infusionsoft API error! Status Code:' + response.statusCode + " | Message: "+response.body.message));
+            } else {
+                resolve(contact);
+            }
+        });
+    });
+}
+
+async function getID(member){
     let opts = {
         'limit': 1, // Number | Sets a total of items to return
         'offset': 1, // Number | Sets a beginning range of items to return
         'customFields': {
-            'member_id': member.customerid
+            'member_id': member
         },
         'optional_properties': ['custom_fields']
-
-
     };
+
     /*
     apiInstance.listContactsUsingGET(opts, (error, data, response) => {
       if (error) {
@@ -54,3 +105,8 @@ function pushToInfusionsoft(member){
     api.appointmentsUsingGET(opts, callback);
     */
 }
+
+module.exports = {
+    create_update: create_update,
+    key: fetch_key
+};
