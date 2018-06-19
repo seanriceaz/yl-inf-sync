@@ -252,6 +252,7 @@ is.key()
             // If contact is in our current mapping of known IS ID's, just update the known contact.
             // TODO: Create mappings and write them to disk
             // TODO: Load mappings
+            // TODO: If there's a mapping, just update the contact (will work on email updates, or updates to contacts without an email address)
 
             // Otherwise, try an update/create call (Simplest, but doesn't work currently when there's an email mismatch)
             promiseArray.push(is.create_update(contacts[contact], key));
@@ -260,19 +261,20 @@ is.key()
                 //console.log("YL Contact: " +contact+ " | IS Contact: "+ISContact.id )
                 //return ISContact
         }
-        await Promise.all(promiseArray).catch(function(err) {
+        var returnedContacts = await Promise.all(promiseArray).catch(function(err) {
             console.log(err);
             return false;
         });
-        //
+        // TODO: Process above returnedContacts and make our mappings array for processing later
         return ismappings;
+
     }).then(function(ismappings){
         // write ismappings to disk
         if(ismappings){
             console.log("writing mappings to disk");
 
             fs.writeFileSync("./data/account_mappings.json", JSON.stringify(ismappings));
-            //yl.write_data_final();
+            yl.write_data_final();
         }
     })
     .catch(function(err){
