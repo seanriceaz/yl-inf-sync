@@ -95,16 +95,19 @@ var compare_to_past = function (freshData) {
 }
 
 function write_data (freshData) {
-    //This is the last thing we should do
-    console.log("writing updated accounts to disk...");
-    //console.log(JSON.stringify(freshData));
-    fs.writeFileSync('data/yl-old.json', JSON.stringify(freshData));
+    console.log("Writing updated accounts temporarily to disk...");
+    fs.writeFileSync('data/yl-temp.json', JSON.stringify(freshData));
+}
+function write_data_final (freshData) {
+    console.log("Storing updated accounts for reference...");
+    fs.copyFileSync('data/yl-temp.json', 'data/yl-old.json');
 }
 
 module.exports = {
     all_members: get_all_members,
     compare_to_past : compare_to_past,
-    write_data: write_data
+    write_data: write_data,
+    write_data_final: write_data_final
 };
 
 //fs.writeFile('output.log',)

@@ -32,8 +32,14 @@ var customFieldIDs = {
     "yloptedout": 55, // bool
 };
 
+var key = "";
+
 // Get and parse out updates to the young living member list
-yl.all_members()
+is.key()
+    .then(function(returnedKey){
+        key = returnedKey;
+    })
+    .then(yl.all_members)
     .then(function(result){
         var accountsToUpdate = yl.compare_to_past(result);
         yl.write_data(result);
@@ -236,10 +242,11 @@ yl.all_members()
         // DEBUG Write JSON to file
         fs.writeFileSync("./data/pushToIS.json", JSON.stringify(jsonResult));
         return jsonResult;
-    }).then(function(contacts){
+    }).then(async function(contacts){
         //Loop through contacts and push them to infusionsoft individually.
         //wait until it's done and upload another!
         var ismappings = {};
+        var promiseArray = [];
         for( var contact in contacts ){
 
             // If contact is in our current mapping of known IS ID's, just update the known contact.
@@ -247,17 +254,26 @@ yl.all_members()
             // TODO: Load mappings
 
             // Otherwise, try an update/create call (Simplest, but doesn't work currently when there's an email mismatch)
-            is.create_update(contacts[contact]).then(function(ISContact){
-                ismappings[contact] = ISContact.id;
-            }).catch(function(err){
-                console.log(err);
-            });
+            promiseArray.push(is.create_update(contacts[contact], key));
+                //.then(function(ISContact){
+                //ismappings[contact] = ISContact.id;
+                //console.log("YL Contact: " +contact+ " | IS Contact: "+ISContact.id )
+                //return ISContact
         }
+        await Promise.all(promiseArray).catch(function(err) {
+            console.log(err);
+            return false;
+        });
+        //
         return ismappings;
     }).then(function(ismappings){
         // write ismappings to disk
-        console.log("writing mappings to disk");
-        fs.writeFileSync("./data/account_mappings.json", JSON.stringify(ismappings));
+        if(ismappings){
+            console.log("writing mappings to disk");
+
+            fs.writeFileSync("./data/account_mappings.json", JSON.stringify(ismappings));
+            //yl.write_data_final();
+        }
     })
     .catch(function(err){
         console.log(err);
