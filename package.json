@@ -2,9 +2,9 @@
   "name": "yl-inf-sync",
   "version": "1.0.0",
   "description": "Enables one-way sync from Young Living account to Infusionsoft",
-  "main": "index.js",
+  "main": "app.js",
   "scripts": {
-    "test": "echo \"Error: no test specified\" && exit 1"
+    "run": "node app.js"
   },
   "repository": {
     "type": "git",
