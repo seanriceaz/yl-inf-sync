@@ -34,14 +34,14 @@ var customFieldIDs = {
 
 var key = "";
 
-// Get and parse out updates to the young living member list
-is.key()
+
+is.key() // Get our access token
     .then(function(returnedKey){
-        key = returnedKey;
+        key = returnedKey; // Store the token for reuse
     })
-    .then(yl.all_members)
+    .then(yl.all_members) // Get all our members from the YL API
     .then(function(result){
-        var accountsToUpdate = yl.compare_to_past(result);
+        var accountsToUpdate = yl.compare_to_past(result); // Select only the ones that were updated
         yl.write_data(result);
         return accountsToUpdate;
     }).then(function(accountsToUpdate){
@@ -50,32 +50,32 @@ is.key()
         for (accountid in accountsToUpdate) {
             var thisAccount = accountsToUpdate[accountid];
             //normalize the country code
-            var billingcountry = "";
-            var billingregion = "";
+            var billingCountry = "";
+            var billingRegion = "";
             if (thisAccount.maincountry.length==2) {
-                billingcountry = countries.alpha2ToAlpha3(thisAccount.maincountry);
+                billingCountry = countries.alpha2ToAlpha3(thisAccount.maincountry);
             } else if (thisAccount.maincountry.length==3){
-                billingcountry = thisAccount.maincountry;
+                billingCountry = thisAccount.maincountry;
             } else if (thisAccount.maincountry.toLowerCase().indexOf("united states")>=0) {
-                billingcountry = "USA";
+                billingCountry = "USA";
             }
 
-            if (thisAccount.mainstate.length < 3 && billingcountry != ""){
-                billingregion = countries.alpha3ToAlpha2(billingcountry)+"-"+thisAccount.mainstate;
+            if (thisAccount.mainstate.length < 3 && billingCountry != ""){
+                billingRegion = countries.alpha3ToAlpha2(billingCountry)+"-"+thisAccount.mainstate;
             } else {
-                billingcountry = "";
+                billingCountry = "";
             }
 
             var contact = {
                 "addresses": [
                     {
-                        "country_code": billingcountry,
+                        "country_code": billingCountry,
                         "field": "BILLING",
                         "line1": thisAccount.mainaddress1,
                         "line2": thisAccount.mainaddress2,
                         "locality": thisAccount.maincity,
                         //"postal_code": "string",
-                        "region": billingregion,
+                        "region": billingRegion,
                         "zip_code": thisAccount.mainzip.split("-")[0],
                         "zip_four": thisAccount.mainzip.split("-")[1]
                     }
@@ -243,9 +243,7 @@ is.key()
         fs.writeFileSync("./data/pushToIS.json", JSON.stringify(jsonResult));
         return jsonResult;
     }).then(async function(contacts){
-        //Loop through contacts and push them to infusionsoft individually.
-        //wait until it's done and upload another!
-        var ismappings = {};
+        var isMappings = {};
         var promiseArray = [];
         for( var contact in contacts ){
 
@@ -256,24 +254,20 @@ is.key()
 
             // Otherwise, try an update/create call (Simplest, but doesn't work currently when there's an email mismatch)
             promiseArray.push(is.create_update(contacts[contact], key));
-                //.then(function(ISContact){
-                //ismappings[contact] = ISContact.id;
-                //console.log("YL Contact: " +contact+ " | IS Contact: "+ISContact.id )
-                //return ISContact
         }
         var returnedContacts = await Promise.all(promiseArray).catch(function(err) {
             console.log(err);
             return false;
         });
         // TODO: Process above returnedContacts and make our mappings array for processing later
-        return ismappings;
+        return isMappings;
 
-    }).then(function(ismappings){
+    }).then(function(isMappings){
         // write ismappings to disk
-        if(ismappings){
+        if(isMappings){
             console.log("writing mappings to disk");
 
-            fs.writeFileSync("./data/account_mappings.json", JSON.stringify(ismappings));
+            fs.writeFileSync("./data/account_mappings.json", JSON.stringify(isMappings));
             yl.write_data_final();
         }
     })

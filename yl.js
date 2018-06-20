@@ -71,7 +71,6 @@ function get_member_page(page){
 var compare_to_past = function (freshData) {
     //This function looks at the new data and compares it to the past data. Ultimately, it creates an array of member ID's that have changed.
     //load data to a js object
-
     try {
         oldData = JSON.parse(fs.readFileSync('data/yl-old.json', 'utf8'));
         //loop through fresh and see if there's anything new
@@ -109,17 +108,3 @@ module.exports = {
     write_data: write_data,
     write_data_final: write_data_final
 };
-
-//fs.writeFile('output.log',)
-
-/*
-
-try {
-  var result = json2csv({ data: myData, fields: fields });
-  console.log(result);
-} catch (err) {
-  // Errors are thrown for bad options, or if the data is empty and no fields are provided.
-  // Be sure to provide fields if it is possible that your data array will be empty.
-  console.error(err);
-}
-*/
