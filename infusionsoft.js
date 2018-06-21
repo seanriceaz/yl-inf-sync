@@ -35,6 +35,8 @@ function fetch_key(){
             }, function(err, response, body) {
                 if (err) {
                     reject(err);
+                } else if (response.statusCode >=400) {
+                    reject(Error("Couldn't get key! Status Code:" + response.statusCode + " | Message: "+response.body.message));
                 } else {
                     //body example: {"access_token":"xxxxxx","token_type":"bearer","expires_in":86400,"refresh_token":"xxxxxxxx","scope":"full|xx123.infusionsoft.com"}
                     var tempToken = JSON.parse(body);
