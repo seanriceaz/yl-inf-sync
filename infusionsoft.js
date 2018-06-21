@@ -23,7 +23,7 @@ function fetch_key(){
         } else {
             //retrieve a key!
             // store refresh token for next time
-            var refresh_token = fs.readFileSync('./REFRESH', 'utf8')
+            var refresh_token = fs.readFileSync('./REFRESH', 'utf8');
             request({
                 method:"POST",
                 url: "https://api.infusionsoft.com/token",
