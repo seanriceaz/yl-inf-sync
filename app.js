@@ -3,6 +3,9 @@ const is =  require('./infusionsoft.js');
 const yl = require ('./yl.js');
 var dateFormat = require('dateformat');
 var countries = require("i18n-iso-countries");
+var request = require('request');
+const dotenv = require('dotenv');
+dotenv.config();
 
 var customFieldIDs = {
     "memberid" : 11, //integer
@@ -33,6 +36,7 @@ var customFieldIDs = {
 };
 
 var key = "";
+var membersUpdated = 0;
 
 
 is.key() // Get our access token
@@ -254,6 +258,7 @@ is.key() // Get our access token
 
             // Otherwise, try an update/create call (Simplest, but doesn't work currently when there's an email mismatch)
             promiseArray.push(is.create_update(contacts[contact], key));
+            membersUpdated ++;
         }
         var returnedContacts = await Promise.all(promiseArray).catch(function(err) {
             console.log(err);
@@ -270,12 +275,26 @@ is.key() // Get our access token
             fs.writeFileSync("./data/account_mappings.json", JSON.stringify(isMappings));
             yl.write_data_final();
         }
+    }).then(function(){
+        // Fire off a webhook event to keep track of if.when this script is running.
+        var webhookEventName = process.env.WEBHOOK_NAME;
+        var webhookURL = "https://maker.ifttt.com/trigger/" + webhookEventName + "/with/key/" + process.env.WEBHOOK_KEY;
+        request.get({
+            'url': webhookURL,
+            'json': true,
+            'body': {
+                "value1" : "SUCCESS",
+                "value2" : "Members updated: "+membersUpdated,
+                //"value3" : "",
+            },
+        }, function(err,response,body){
+           if(err){
+               console.log('webhook get failed: '+ response.message);
+           } else {
+               console.log('webhook post successful');
+           }
+        });
     })
     .catch(function(err){
         console.log(err);
     });
-
-
-
-
-// Write the updated account listing to disk for comparison later
