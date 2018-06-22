@@ -5,6 +5,8 @@ var dateFormat = require('dateformat');
 var countries = require("i18n-iso-countries");
 var request = require('request');
 const dotenv = require('dotenv');
+var cron = require('node-cron');
+
 dotenv.config();
 
 var customFieldIDs = {
@@ -38,17 +40,18 @@ var customFieldIDs = {
 var key = "";
 var membersUpdated = 0;
 
+cron.schedule('0 */6 * * *', function() {
 
-is.key() // Get our access token
-    .then(function(returnedKey){
-        key = returnedKey; // Store the token for reuse
-    })
-    .then(yl.all_members) // Get all our members from the YL API
-    .then(function(result){
-        var accountsToUpdate = yl.compare_to_past(result); // Select only the ones that were updated
-        yl.write_data(result);
-        return accountsToUpdate;
-    }).then(function(accountsToUpdate){
+    is.key(true) // Get our access token
+        .then(function (returnedKey) {
+            key = returnedKey; // Store the token for reuse
+        })
+        .then(yl.all_members) // Get all our members from the YL API
+        .then(function (result) {
+            var accountsToUpdate = yl.compare_to_past(result); // Select only the ones that were updated
+            yl.write_data(result);
+            return accountsToUpdate;
+        }).then(function (accountsToUpdate) {
         // Convert updated YL contacts into Infusionsoft Contact JSON format
         var jsonResult = {};
         for (accountid in accountsToUpdate) {
@@ -56,16 +59,16 @@ is.key() // Get our access token
             //normalize the country code
             var billingCountry = "";
             var billingRegion = "";
-            if (thisAccount.maincountry.length==2) {
+            if (thisAccount.maincountry.length == 2) {
                 billingCountry = countries.alpha2ToAlpha3(thisAccount.maincountry);
-            } else if (thisAccount.maincountry.length==3){
+            } else if (thisAccount.maincountry.length == 3) {
                 billingCountry = thisAccount.maincountry;
-            } else if (thisAccount.maincountry.toLowerCase().indexOf("united states")>=0) {
+            } else if (thisAccount.maincountry.toLowerCase().indexOf("united states") >= 0) {
                 billingCountry = "USA";
             }
 
-            if (thisAccount.mainstate.length < 3 && billingCountry != ""){
-                billingRegion = countries.alpha3ToAlpha2(billingCountry)+"-"+thisAccount.mainstate;
+            if (thisAccount.mainstate.length < 3 && billingCountry != "") {
+                billingRegion = countries.alpha3ToAlpha2(billingCountry) + "-" + thisAccount.mainstate;
             } else {
                 billingCountry = "";
             }
@@ -188,11 +191,11 @@ is.key() // Get our access token
                         "id": customFieldIDs.accounttype
                     },
                     {
-                        "content": dateFormat(thisAccount.dateactivated,"isoDateTime"),
+                        "content": dateFormat(thisAccount.dateactivated, "isoDateTime"),
                         "id": customFieldIDs.activateddate
                     },
                     {
-                        "content": thisAccount.optedoutofemail? 1 : 0,
+                        "content": thisAccount.optedoutofemail ? 1 : 0,
                         "id": customFieldIDs.yloptedout
                     }
                 ],
@@ -241,15 +244,15 @@ is.key() // Get our access token
                 //"time_zone": "string",
                 //"website": "string"
             }
-            jsonResult[accountid]=contact;
+            jsonResult[accountid] = contact;
         }
         // DEBUG Write JSON to file
         fs.writeFileSync("./data/pushToIS.json", JSON.stringify(jsonResult));
         return jsonResult;
-    }).then(async function(contacts){
+    }).then(async function (contacts) {
         var isMappings = {};
         var promiseArray = [];
-        for( var contact in contacts ){
+        for (var contact in contacts) {
 
             // If contact is in our current mapping of known IS ID's, just update the known contact.
             // TODO: Create mappings and write them to disk
@@ -258,24 +261,24 @@ is.key() // Get our access token
 
             // Otherwise, try an update/create call (Simplest, but doesn't work currently when there's an email mismatch)
             promiseArray.push(is.create_update(contacts[contact], key));
-            membersUpdated ++;
+            membersUpdated++;
         }
-        var returnedContacts = await Promise.all(promiseArray).catch(function(err) {
+        var returnedContacts = await Promise.all(promiseArray).catch(function (err) {
             console.log(err);
             return false;
         });
         // TODO: Process above returnedContacts and make our mappings array for processing later
         return isMappings;
 
-    }).then(function(isMappings){
+    }).then(function (isMappings) {
         // write ismappings to disk
-        if(isMappings){
+        if (isMappings) {
             console.log("writing mappings to disk");
 
             fs.writeFileSync("./data/account_mappings.json", JSON.stringify(isMappings));
             yl.write_data_final();
         }
-    }).then(function(){
+    }).then(function () {
         // Fire off a webhook event to keep track of if.when this script is running.
         var webhookEventName = process.env.WEBHOOK_NAME;
         var webhookURL = "https://maker.ifttt.com/trigger/" + webhookEventName + "/with/key/" + process.env.WEBHOOK_KEY;
@@ -283,18 +286,18 @@ is.key() // Get our access token
             'url': webhookURL,
             'json': true,
             'body': {
-                "value1" : "SUCCESS",
-                "value2" : "Members updated: "+membersUpdated,
+                "value1": "SUCCESS",
+                "value2": "Members updated: " + membersUpdated,
                 //"value3" : "",
             },
-        }, function(err,response,body){
-           if(err){
-               console.log('webhook get failed: '+ response.message);
-           } else {
-               console.log('webhook post successful');
-           }
+        }, function (err, response, body) {
+            if (err) {
+                console.log('webhook get failed: ' + response.message);
+            } else {
+                console.log('webhook post successful');
+            }
         });
-    })
-    .catch(function(err){
+    }).catch(function (err) {
         console.log(err);
     });
+});

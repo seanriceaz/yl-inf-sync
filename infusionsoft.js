@@ -15,10 +15,10 @@ var keys = {
     key: ""
 }
 
-function fetch_key(){
+function fetch_key(forceFetch){
     //if we don't have a key for this session, let's get a new one
     return new Promise(function(resolve, reject){
-        if (keys.key != ""){
+        if (keys.key != "" && !forceFetch){
             resolve(keys.key);
         } else {
             //retrieve a key!
