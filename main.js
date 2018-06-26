@@ -5,7 +5,6 @@ var dateFormat = require('dateformat');
 var countries = require("i18n-iso-countries");
 var request = require('request');
 const dotenv = require('dotenv');
-var cron = require('node-cron');
 
 dotenv.config();
 
@@ -40,7 +39,7 @@ var customFieldIDs = {
 var key = "";
 var membersUpdated = 0;
 
-cron.schedule('0 */6 * * *', function() {
+var main = function(){
 
     is.key(true) // Get our access token
         .then(function (returnedKey) {
@@ -300,4 +299,7 @@ cron.schedule('0 */6 * * *', function() {
     }).catch(function (err) {
         console.log(err);
     });
-});
+}
+module.exports = {
+    main: main
+};
