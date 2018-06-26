@@ -24,6 +24,7 @@ function fetch_key(forceFetch){
             //retrieve a key!
             // store refresh token for next time
             var refresh_token = fs.readFileSync('./REFRESH', 'utf8');
+            console.log("Using refresh token: "+ refresh_token);
             request({
                 method:"POST",
                 url: "https://api.infusionsoft.com/token",
