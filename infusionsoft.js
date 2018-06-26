@@ -23,12 +23,12 @@ function fetch_key(forceFetch){
         } else {
             //retrieve a key!
             // store refresh token for next time
-            var refresh_token = fs.readFileSync('./REFRESH', 'utf8');
-            console.log("Using refresh token: "+ refresh_token);
+            var refresh = JSON.parse(fs.readFileSync('./REFRESH', 'utf8'));
+            console.log("Using refresh token: "+ refresh.refresh_token);
             request({
                 method:"POST",
                 url: "https://api.infusionsoft.com/token",
-                form:{refresh_token: refresh_token,
+                form:{refresh_token: refresh.refresh_token,
                 grant_type: "refresh_token"},
                 headers: {
                     "authorization":'Basic ' + Buffer.from(keys.client + ':' + keys.secret).toString('base64')
@@ -44,7 +44,7 @@ function fetch_key(forceFetch){
                     keys.key = tempToken.access_token;
                     console.log("keys.key: "+ keys.key+" | access: "+ tempToken.access_token+" | refresh: " + tempToken.refresh_token);
                     console.log(body);
-                    fs.writeFileSync( "./REFRESH", tempToken.refresh_token);
+                    fs.writeFileSync( "./REFRESH", JSON.stringify(tempToken));
                     resolve(tempToken.access_token);
                 }
 
