@@ -40,7 +40,7 @@ var key = "";
 var membersUpdated = 0;
 
 var main = function(){
-
+    membersUpdated = 0;
     is.key(true) // Get our access token
         .then(function (returnedKey) {
             key = returnedKey; // Store the token for reuse
@@ -201,7 +201,7 @@ var main = function(){
                 "duplicate_option": "Email",
                 "email_addresses": [
                     {
-                        "email": thisAccount.email,
+                        "email": (thisAccount.email.indexOf("@") > 0) ? thisAccount.email : "NO_EMAIL_"+thisAccount.properName.first+thisAccount.properName.last,
                         "field": "EMAIL1"
                     }
                 ],
