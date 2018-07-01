@@ -72,7 +72,7 @@ var compare_to_past = function (freshData) {
     //This function looks at the new data and compares it to the past data. Ultimately, it creates an array of member ID's that have changed.
     //load data to a js object
     try {
-        oldData = JSON.parse(fs.readFileSync('data/yl-old.json', 'utf8'));
+        var oldData = JSON.parse(fs.readFileSync('data/yl-old.json', 'utf8'));
         //loop through fresh and see if there's anything new
         var updatedAccounts = {};
         var count = 0;
