@@ -53,7 +53,7 @@ async function get_all_members(){
         page_number ++;
         data = await get_member_page(page_number);
     }
-    return format_names(build_array_keys(accounts));
+    return {accounts: format_names(build_array_keys(accounts)), count: accounts.length, errors: ""}
 }
 
 function get_member_page(page){
@@ -86,10 +86,10 @@ var compare_to_past = function (freshData) {
             }
         }
         console.log(count + " Members updated");
-        return updatedAccounts;
+        return {accounts: updatedAccounts, count: count, errors: ""};
     } catch (e) {
         console.log(e);
-        return freshData;
+        return {accounts: freshData, count: -1, errors: e};
     }
 }
 

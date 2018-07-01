@@ -37,24 +37,23 @@ var customFieldIDs = {
 };
 
 var key = "";
-var membersUpdated = 0;
 
 var main = function(){
-    membersUpdated = 0;
     is.key(true) // Get our access token
         .then(function (returnedKey) {
             key = returnedKey; // Store the token for reuse
         })
         .then(yl.all_members) // Get all our members from the YL API
         .then(function (result) {
-            var accountsToUpdate = yl.compare_to_past(result); // Select only the ones that were updated
+            var accountsToUpdate = yl.compare_to_past(result.accounts); // Select only the ones that were updated
             yl.write_data(result);
-            return accountsToUpdate;
+            var errors = "" + result.errors + accountsToUpdate.errors;
+            return {accounts: accountsToUpdate.accounts, fullCount:result.count, updateCount: accountsToUpdate.count, errors: errors};
         }).then(function (accountsToUpdate) {
         // Convert updated YL contacts into Infusionsoft Contact JSON format
         var jsonResult = {};
-        for (accountid in accountsToUpdate) {
-            var thisAccount = accountsToUpdate[accountid];
+        for (accountid in accountsToUpdate.accounts) {
+            var thisAccount = accountsToUpdate.accounts[accountid];
             //normalize the country code
             var billingCountry = "";
             var billingRegion = "";
@@ -247,11 +246,13 @@ var main = function(){
         }
         // DEBUG Write JSON to file
         fs.writeFileSync("./data/pushToIS.json", JSON.stringify(jsonResult));
-        return jsonResult;
+        accountsToUpdate.contacts = jsonResult;
+        return accountsToUpdate;
     }).then(async function (contacts) {
-        var isMappings = {};
+        //var isMappings = {};
         var promiseArray = [];
-        for (var contact in contacts) {
+        var membersUpdated = 0;
+        for (var contact in contacts.contacts) {
 
             // If contact is in our current mapping of known IS ID's, just update the known contact.
             // TODO: Create mappings and write them to disk
@@ -259,25 +260,28 @@ var main = function(){
             // TODO: If there's a mapping, just update the contact (will work on email updates, or updates to contacts without an email address)
 
             // Otherwise, try an update/create call (Simplest, but doesn't work currently when there's an email mismatch)
-            promiseArray.push(is.create_update(contacts[contact], key));
+            promiseArray.push(is.create_update(contacts.contacts[contact], key));
             membersUpdated++;
         }
         var returnedContacts = await Promise.all(promiseArray).catch(function (err) {
             console.log(err);
+            contacts.errors = contacts.errors + err;
             return false;
         });
         // TODO: Process above returnedContacts and make our mappings array for processing later
-        return isMappings;
+        contacts.pushCount = membersUpdated;
+        return contacts;
 
-    }).then(function (isMappings) {
+    }).then(function (contacts) {
         // write ismappings to disk
-        if (isMappings) {
-            console.log("writing mappings to disk");
+        //if (isMappings) {
+            //console.log("writing mappings to disk");
 
-            fs.writeFileSync("./data/account_mappings.json", JSON.stringify(isMappings));
+            //fs.writeFileSync("./data/account_mappings.json", JSON.stringify(isMappings));
             yl.write_data_final();
-        }
-    }).then(function () {
+            return contacts
+        //}
+    }).then(function (contacts) {
         // Fire off a webhook event to keep track of if.when this script is running.
         var webhookEventName = process.env.WEBHOOK_NAME;
         var webhookURL = "https://maker.ifttt.com/trigger/" + webhookEventName + "/with/key/" + process.env.WEBHOOK_KEY;
@@ -285,9 +289,9 @@ var main = function(){
             'url': webhookURL,
             'json': true,
             'body': {
-                "value1": "SUCCESS",
-                "value2": "Members updated: " + membersUpdated,
-                //"value3" : "",
+                "value1": "Members: " + contacts.fullCount,
+                "value2": "Changed: " + contacts.updateCount + "| Pushed: "+contacts.pushCount,
+                "value3": "Errors: " + contacts.errors,
             },
         }, function (err, response, body) {
             if (err) {
