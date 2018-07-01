@@ -266,7 +266,6 @@ var main = function(){
         var returnedContacts = await Promise.all(promiseArray).catch(function (err) {
             console.log(err);
             contacts.errors = contacts.errors + err;
-            return false;
         });
         // TODO: Process above returnedContacts and make our mappings array for processing later
         contacts.pushCount = membersUpdated;
