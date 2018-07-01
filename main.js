@@ -200,7 +200,7 @@ var main = function(){
                     "duplicate_option": "Email",
                     "email_addresses": [
                         {
-                            "email": (thisAccount.email.indexOf("@") > 0) ? thisAccount.email : "NO_EMAIL_"+thisAccount.properName.first+thisAccount.properName.last,
+                            "email": (thisAccount.email.indexOf("@") > 0) ? thisAccount.email : "NO_EMAIL_"+thisAccount.properName.first+thisAccount.properName.last+"@mailinator.com",
                             "field": "EMAIL1"
                         }
                     ],
