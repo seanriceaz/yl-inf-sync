@@ -27,3 +27,9 @@ By default, this syncs every 6 hours starting at midnight derver time. You can a
 2. Install [PM2](https://pm2.io/doc/en/runtime/quick-start/): `$ npm install pm2 -g`
 3. Setup the daemon to run forever: `$ pm2 start schedule.js --name inf_yl_sync`
 4. Setup the daemon to restart on server reboot: `pm2 startup` (follow the instructions it gives you)
+
+## Disclaimer
+
+This code seems to work for me and my particular connection. It may not work for you. I've provided it as a way to help you get started with your own solution. In other words, it's for educational purposes only. As such, I'm not responsible for how you use it and any data loss or other damages you may incur.
+
+Code responsibly!
