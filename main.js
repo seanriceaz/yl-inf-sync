@@ -6,39 +6,36 @@ var countries = require("i18n-iso-countries");
 var request = require('request');
 const dotenv = require('dotenv');
 
-dotenv.config();
-
-var customFieldIDs = {
-    "memberid" : 11, //integer
-    "level" : 6, //integer
-    "pv" : 13, //decimal
-    "ogv" : 15, //decimal
-    "pgv" : 17, //decimal
-    "autoshipday" : 19, //int
-    "hasautoship" : 21, //bool (yes/no) 0 or 1
-    "autoshippv" : 23, //decimal
-    "autoshipstatus" : 25, //text
-    "pvassistant" : 27, //bool (yes/no) 0 or 1
-    "signupdate" : 29, //date
-    "sponsorid" : 8, //int
-    "enrollerid" : 31, //int
-    "lastorderdate" : 33, //date -- yyyy-mm-dd
-    "lastorderpv" : 35, //decimal
-    "highestpaidrank" : 37, //int
-    "previousrank" : 39, //int
-    "currentrank" : 41, //int
-    "rankchange": 43, //text
-    "forecastpv": 45, //decimal
-    "schedulepv": 47, //decimal
-    "accountstatus" : 49, //text
-    "accounttype" : 51, //text
-    "activateddate" : 53, //date -- yyyy-mm-dd
-    "yloptedout": 55, // bool
-};
-
-var key = "";
-
 var main = function(){
+    dotenv.config();
+    var customFieldIDs = {
+        "memberid" : 11, //integer
+        "level" : 6, //integer
+        "pv" : 13, //decimal
+        "ogv" : 15, //decimal
+        "pgv" : 17, //decimal
+        "autoshipday" : 19, //int
+        "hasautoship" : 21, //bool (yes/no) 0 or 1
+        "autoshippv" : 23, //decimal
+        "autoshipstatus" : 25, //text
+        "pvassistant" : 27, //bool (yes/no) 0 or 1
+        "signupdate" : 29, //date
+        "sponsorid" : 8, //int
+        "enrollerid" : 31, //int
+        "lastorderdate" : 33, //date -- yyyy-mm-dd
+        "lastorderpv" : 35, //decimal
+        "highestpaidrank" : 37, //int
+        "previousrank" : 39, //int
+        "currentrank" : 41, //int
+        "rankchange": 43, //text
+        "forecastpv": 45, //decimal
+        "schedulepv": 47, //decimal
+        "accountstatus" : 49, //text
+        "accounttype" : 51, //text
+        "activateddate" : 53, //date -- yyyy-mm-dd
+        "yloptedout": 55, // bool
+    };
+    var key = "";
     is.key(true) // Get our access token
         .then(function (returnedKey) {
             key = returnedKey; // Store the token for reuse

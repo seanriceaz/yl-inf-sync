@@ -7,21 +7,6 @@ dotenv.config();
 
 var yl = require('youngliving-node').youngliving();
 
-
-var yl_login_options = {
-    password: process.env.YL_PASSWORD,
-    member_id: process.env.YL_MEMBER_ID,
-}
-
-// Store credentials
-yl.use(yl_login_options);
-
-//Set up limits
-
-var period = yl.get_period(); // or pass optional date parameter for a different period.
-var per_page = 200,
-    page_number = 1;
-
 var build_array_keys = function (obj) {
     //Loops through an array of members and creates keys from each element.
     console.log("Building a keyed object for " + obj.length + " members...");
@@ -45,19 +30,39 @@ var format_names = function(obj) {
 
 async function get_all_members(){
     var accounts = [];
+    var errors = "";
     console.log('getting members from YL...');
-    let data = await get_member_page(page_number);
-    while (data.pagination.currentpage <= data.pagination.totalpages) {
-        accounts = accounts.concat(data.accounts);
-        console.log("page: "+page_number+ " | total accounts fetched: "+accounts.length+" | OK");
-        page_number ++;
-        data = await get_member_page(page_number);
-    }
-    return {accounts: format_names(build_array_keys(accounts)), count: accounts.length, errors: ""}
+    try {
+        var page_number = 1;
+        let data = await get_member_page(page_number);
+        while (data.pagination.currentpage <= data.pagination.totalpages) {
+            accounts = accounts.concat(data.accounts);
+            console.log("page: " + page_number + " | total accounts fetched: " + accounts.length + " | OK");
+            page_number++;
+            data = await get_member_page(page_number);
+        }
+    } catch (e){
+        errors = errors + e;
+    };
+    return {accounts: format_names(build_array_keys(accounts)), count: accounts.length, errors: errors}
 }
 
 function get_member_page(page){
     return new Promise(function(resolve, reject){
+
+        dotenv.config();
+
+        var yl_login_options = {
+            password: process.env.YL_PASSWORD,
+            member_id: process.env.YL_MEMBER_ID,
+        }
+
+        // Store credentials
+        yl.use(yl_login_options);
+
+        var period = yl.get_period(); // or pass optional date parameter for a different period.
+        var per_page = 200;
+
         yl.all_members(period, per_page, page, function(err, data){
             if(err){
                 reject(err);
