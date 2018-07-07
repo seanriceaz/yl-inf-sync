@@ -5,7 +5,7 @@ const fs = require('fs');
 dotenv.config();
 
 throttledRequest.configure({
-    requests: 15,
+    requests: 10,
     milliseconds: 1000
 });
 
