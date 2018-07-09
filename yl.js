@@ -22,7 +22,7 @@ var format_names = function(obj) {
     console.log("Formatting names...");
     for (var customerid in obj) {
         if (obj.hasOwnProperty(customerid)) {
-            obj[customerid].properName = parseFullName(obj[customerid].name);
+            obj[customerid].properName = parseFullName(obj[customerid].name.replace(/\s([A-Z])\s/, ' $1. '));
         }
     }
     return obj;
