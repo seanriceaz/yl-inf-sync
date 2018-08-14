@@ -77,7 +77,11 @@ var compare_to_past = function (freshData) {
     //This function looks at the new data and compares it to the past data. Ultimately, it creates an array of member ID's that have changed.
     //load data to a js object
     try {
-        var oldData = JSON.parse(fs.readFileSync('data/yl-old.json', 'utf8'));
+        var oldData = {};
+        if (fs.existsSync('yl-old.json')){
+            oldData = JSON.parse(fs.readFileSync('yl-old.json', 'utf8'));
+        }
+        
         //loop through fresh and see if there's anything new
         var updatedAccounts = {};
         var count = 0;
@@ -100,11 +104,11 @@ var compare_to_past = function (freshData) {
 
 function write_data (freshData) {
     console.log("Writing updated accounts temporarily to disk...");
-    fs.writeFileSync('data/yl-temp.json', JSON.stringify(freshData));
+    fs.writeFileSync('yl-temp.json', JSON.stringify(freshData));
 }
 function write_data_final (freshData) {
     console.log("Storing updated accounts for reference...");
-    fs.copyFileSync('data/yl-temp.json', 'data/yl-old.json');
+    fs.copyFileSync('yl-temp.json', 'yl-old.json');
 }
 
 module.exports = {

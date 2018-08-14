@@ -72,3 +72,6 @@ typings/
 
 #Files that need to be hidden
 REFRESH
+yl-temp.json
+yl-old.json
+pushToIS.json

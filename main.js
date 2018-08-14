@@ -242,7 +242,7 @@ var main = function(){
                 jsonResult[accountid] = contact;
             }
             // DEBUG Write JSON to file
-            fs.writeFileSync("./data/pushToIS.json", JSON.stringify(jsonResult));
+            //fs.writeFileSync("./pushToIS.json", JSON.stringify(jsonResult));
             accountsToUpdate.contacts = jsonResult;
             return accountsToUpdate;
         }).then(async function (contacts) {
