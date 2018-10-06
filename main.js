@@ -34,6 +34,8 @@ var main = function(){
         "accounttype" : 51, //text
         "activateddate" : 53, //date -- yyyy-mm-dd
         "yloptedout": 55, // bool
+        //"enrollerfirstname": 57?????,  //text
+        //"enrollerlastname": 59?????, //text
     };
     var key = "";
     is.key(true) // Get our access token
@@ -45,7 +47,12 @@ var main = function(){
             var accountsToUpdate = yl.compare_to_past(result.accounts); // Select only the ones that were updated
             yl.write_data(result.accounts);
             var errors = "" + result.errors + accountsToUpdate.errors;
-            return {accounts: accountsToUpdate.accounts, fullCount:result.count, updateCount: accountsToUpdate.count, errors: errors};
+            return {
+                accounts: accountsToUpdate.accounts,
+                // allAccounts: result.accounts, //When we want to map member names to enroller IDs...
+                fullCount:result.count,
+                updateCount: accountsToUpdate.count,
+                errors: errors};
         }).then(function (accountsToUpdate) {
         // Convert updated YL contacts into Infusionsoft Contact JSON format
             var jsonResult = {};
@@ -193,6 +200,14 @@ var main = function(){
                             "content": thisAccount.optedoutofemail ? 1 : 0,
                             "id": customFieldIDs.yloptedout
                         }
+                        /*{  //For enroller name
+                            "content": accountsToUpdate.allAccounts[thisAccount.enrollerid].properName.first,
+                            "id": customFieldIDs.enrollerfirstname
+                        },
+                        {
+                            "content": accountsToUpdate.allAccounts[thisAccount.enrollerid].properName.last,
+                            "id": customFieldIDs.enrollerlastname
+                        }*/
                     ],
                     "duplicate_option": "Email",
                     "email_addresses": [
