@@ -214,7 +214,7 @@ var main = function(){
                     //"lead_source_id": 0,
                     "middle_name": thisAccount.properName.middle,
                     //"notes": "string",
-                    //"opt_in_reason": "string",
+                    "opt_in_reason": thisAccount.optedoutofemail ? "" : "YL Member",
                     //"owner_id": 0,
                     "phone_numbers": [
                         {
