@@ -4,7 +4,7 @@
   "description": "Enables one-way sync from Young Living account to Infusionsoft",
   "main": "app.js",
   "scripts": {
-    "run": "node app.js"
+    "run": "node index.js"
   },
   "repository": {
     "type": "git",
@@ -30,8 +30,5 @@
     "request": "^2.87.0",
     "throttled-request": "^0.1.1",
     "youngliving-node": "github:seanriceaz/youngliving-node"
-  },
-  "devDependencies": {
-    "json2csv": "^3.11.5"
   }
 }

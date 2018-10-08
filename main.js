@@ -34,8 +34,8 @@ var main = function(){
         "accounttype" : 51, //text
         "activateddate" : 53, //date -- yyyy-mm-dd
         "yloptedout": 55, // bool
-        //"enrollerfirstname": 57?????,  //text
-        //"enrollerlastname": 59?????, //text
+        "enrollerfirstname": 56,  //text
+        "enrollerlastname": 58, //text
     };
     var key = "";
     is.key(true) // Get our access token
@@ -49,7 +49,7 @@ var main = function(){
             var errors = "" + result.errors + accountsToUpdate.errors;
             return {
                 accounts: accountsToUpdate.accounts,
-                // allAccounts: result.accounts, //When we want to map member names to enroller IDs...
+                allAccounts: result.accounts, //When we want to map member names to enroller IDs...
                 fullCount:result.count,
                 updateCount: accountsToUpdate.count,
                 errors: errors};
@@ -61,6 +61,7 @@ var main = function(){
                 //normalize the country code
                 var billingCountry = "";
                 var billingRegion = "";
+                var enrollerKnown = false;
                 if (thisAccount.maincountry.length == 2) {
                     billingCountry = countries.alpha2ToAlpha3(thisAccount.maincountry);
                 } else if (thisAccount.maincountry.length == 3) {
@@ -74,7 +75,10 @@ var main = function(){
                 } else {
                     billingCountry = "";
                 }
-
+                if(typeof(accountsToUpdate.allAccounts[thisAccount.enrollerid]) !== "undefined")
+                {
+                    enrollerKnown = true;
+                }
                 var contact = {
                     "addresses": [
                         {
@@ -199,15 +203,15 @@ var main = function(){
                         {
                             "content": thisAccount.optedoutofemail ? 1 : 0,
                             "id": customFieldIDs.yloptedout
-                        }
-                        /*{  //For enroller name
-                            "content": accountsToUpdate.allAccounts[thisAccount.enrollerid].properName.first,
+                        },
+                        {  //For enroller name
+                            "content": enrollerKnown ? accountsToUpdate.allAccounts[thisAccount.enrollerid].properName.first : null,
                             "id": customFieldIDs.enrollerfirstname
                         },
                         {
-                            "content": accountsToUpdate.allAccounts[thisAccount.enrollerid].properName.last,
+                            "content": enrollerKnown ? accountsToUpdate.allAccounts[thisAccount.enrollerid].properName.last : null,
                             "id": customFieldIDs.enrollerlastname
-                        }*/
+                        }
                     ],
                     "duplicate_option": "Email",
                     "email_addresses": [
