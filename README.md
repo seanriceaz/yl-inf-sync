@@ -15,7 +15,7 @@ I assume you have an account with [Young Living](http://wwwyoungliving.com), an 
 1. Clone or fork this repo
 2. Modify it to your needs
 3. Create a `.env` file to store your access credentials for Young Living and Infusionsoft (see the example)
-4. Create a file called `REFRESH` (no extension) and add your Infusionsoft refresh token into it as JSON: `{"refresh_token":"xxxxxxxxxxx21345aadsfaxx"}`
+4. Create a file called `REFRESH` (no extension) and add your Infusionsoft refresh token (get this from https://accounts.infusionsoft.com/app/central/home) into it as JSON: `{"refresh_token":"xxxxxxxxxxx21345aadsfaxx"}`
 5. `$ npm install`
 6. `$ node index.js`
 
