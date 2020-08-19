@@ -36,6 +36,7 @@ var main = function(){
         "yloptedout": 55, // bool
         "enrollerfirstname": 56,  //text
         "enrollerlastname": 58, //text
+        "uplinemembernumbers": 60,
     };
     var key = "";
     is.key(true) // Get our access token
@@ -44,6 +45,16 @@ var main = function(){
         })
         .then(yl.all_members) // Get all our members from the YL API
         .then(function (result) {
+            //Build a list of upline ids for a custom field
+            for(var account in result.accounts){
+                currentUpline = result.accounts[account].sponsorid;
+                upline = currentUpline + " ";
+                for(i=0;i<result.accounts[account].level;i++){
+                    currentUpline = result.accounts[currentUpline].sponsorid;
+                    upline = upline + currentUpline +" ";
+                }
+                result.accounts[account].upline = upline;
+            }
             var accountsToUpdate = yl.compare_to_past(result.accounts); // Select only the ones that were updated
             yl.write_data(result.accounts);
             var errors = "" + result.errors + accountsToUpdate.errors;
@@ -211,6 +222,10 @@ var main = function(){
                         {
                             "content": enrollerKnown ? accountsToUpdate.allAccounts[thisAccount.enrollerid].properName.last : null,
                             "id": customFieldIDs.enrollerlastname
+                        },
+                        {
+                            "content": thisAccount.upline,
+                            "id": customFieldIDs.uplinemembernumbers
                         }
                     ],
                     "duplicate_option": "Email",
@@ -277,6 +292,8 @@ var main = function(){
 
                 // Otherwise, try an update/create call (Simplest, but doesn't work currently when there's an email mismatch)
                 promiseArray.push(is.create_update(contacts.contacts[contact], key));
+                // TODO: This is where to push updated contacts to projectBroadcast too.
+                // promiseArray.push(pb.create_update(contacts.contacts[contact], key));
                 membersUpdated++;
             }
             var returnedContacts = await Promise.all(promiseArray).catch(function (err) {
